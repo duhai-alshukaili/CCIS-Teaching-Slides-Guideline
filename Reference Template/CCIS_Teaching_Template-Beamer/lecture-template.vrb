@@ -1,0 +1,21 @@
+\frametitle{Each pass of the loop compares the target with the midpoint and keeps only one half}
+\begin{columns}[T,onlytextwidth]
+    \column{0.68\textwidth}
+\begin{lstlisting}[language=Python]
+def binary_search(items, target):
+    low, high = 0, len(items) - 1
+    while low <= high:
+<@        mid = (low + high) // 2@>
+        if items[mid] == target:
+            return mid
+        if items[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+\end{lstlisting}
+    \column{0.28\textwidth}
+      \vspace{14mm}
+      {\color{ccisOrangeText}\bfseries\small Line 4}\par\vskip1.5mm
+      \small The midpoint splits the remaining range, so each pass discards half of it.
+  \end{columns}

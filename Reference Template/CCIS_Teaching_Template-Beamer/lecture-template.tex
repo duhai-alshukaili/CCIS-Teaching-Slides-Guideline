@@ -1,0 +1,201 @@
+% CCIS lecture template (Beamer). Compile: latexmk -pdf lecture-template.tex
+% (pdflatex + biber, run twice so the section dividers and agenda can list every part).
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{CCIS}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[style=apa,backend=biber]{biblatex}
+\addbibresource{references.bib}
+
+% ---------------------------------------------------------------- course details (set once per course)
+\coursecode{[COURSE CODE]}
+\coursetitle{[Course title]}
+\branch{[Branch]}
+\semester{[Semester] [Academic year, e.g. 2026/2027]}
+% ---------------------------------------------------------------- lecture details
+\lecturenumber{[N]}
+\title{[Lecture topic in sentence case]}
+\author{[Lecturer name]}
+\acknowledgment{Acknowledgment: [Adapted from slides by \ldots{} / Original work by the course team]. [AI-assistance disclosure, if any.]}
+
+
+\newcommand{\orange}[1]{\color{ccisOrangeText}{#1}}
+
+\begin{document}
+
+% ================================================================ Opening
+\titleframe
+
+\begin{frame}{This lecture builds on the work of others, acknowledged below}
+  \framesubtitle{Credits}
+  \begin{description}[Open materials]
+    \item[Adapted from] slides by [Name] ([UTAS branch], [Semester]); [what you changed]
+    \item[Textbook slides] instructor slides for [Textbook, edition], used under adopter terms
+    \item[Open materials] [Course, university], [CC license]; shared under the same license
+    \item[AI assistance] [Draft headlines and practice questions prepared with an AI assistant; content reviewed and verified by the lecturer]
+  \end{description}
+  \source{Delete rows that do not apply. Check license terms before reuse (Guideline \S 8).}
+\end{frame}
+
+\begin{frame}{By the end of this lecture, you should be able to:}
+  \framesubtitle{Learning outcomes}
+  \begin{enumerate}\setlength{\itemsep}{4mm}
+    \item \textbf{Trace} [the execution of \ldots{} on \ldots] \clo{[x]}
+    \item \textbf{Compare} [\ldots{} and \ldots{} in terms of \ldots] \clo{[x]}
+    \item \textbf{Implement} [\ldots{} to solve \ldots] \clo{[x]}
+  \end{enumerate}
+  \lastlecture{[One line linking to the previous lecture, e.g. the question it left open]}
+\end{frame}
+
+\begin{frame}{Today's lecture moves through two parts, one for each outcome}
+  \framesubtitle{Agenda}
+  \agendalist
+\end{frame}
+
+% ================================================================ Part 1
+\partoutcome{Outcome 1}
+\partquestion{How can we find an item in a sorted array without checking every element?}
+\section{Searching sorted data}
+
+\begin{frame}{Binary search halves the search space at each step, so it runs in $O(\log n)$ time}
+  \centering
+  \begin{tikzpicture}[cell/.style={draw=ccisBorder,minimum width=8.6mm,minimum height=7mm,font=\small},
+                      off/.style={cell,draw=ccisHair,text=ccisMuted!70},
+                      on/.style={cell,fill=ccisBadge},
+                      mid/.style={cell,fill=ccisBlue,draw=ccisBlue,text=white,font=\small\bfseries},
+                      tag/.style={font=\fontsize{6.8}{8}\selectfont,text=ccisMuted},
+                      midtag/.style={font=\fontsize{6.8}{8}\selectfont\bfseries,text=ccisOrangeText}]
+    \def\vals{2,5,8,12,16,23,38,56}
+    % step, low, mid, high, note
+    \foreach \r/\lo/\mi/\hi/\note in {1/1/4/8/{12 $<$ 38, so discard the left half},
+                                     2/5/6/8/{23 $<$ 38, so discard the left half again},
+                                     3/7/7/8/{38 found after 3 comparisons}}{
+      \node[anchor=west,font=\small\bfseries,text=ccisBlue] at (-1.6,-\r*1.45) {Step \r};
+      \foreach \v [count=\i] in \vals {
+        \pgfmathtruncatemacro\inr{(\i>=\lo)&&(\i<=\hi)}
+        \ifnum\i=\mi \node[mid] at (\i*0.92,-\r*1.45) {\v};
+        \else\ifnum\inr=1 \node[on] at (\i*0.92,-\r*1.45) {\v};
+        \else \node[off] at (\i*0.92,-\r*1.45) {\v};\fi\fi
+      }
+      \node[midtag] at (\mi*0.92,-\r*1.45-0.55) {mid};
+      \ifnum\lo<\mi \node[tag] at (\lo*0.92,-\r*1.45-0.55) {low};\fi
+      \node[tag] at (\hi*0.92,-\r*1.45-0.55) {high};
+      \node[anchor=west,text width=44mm,font=\small,align=left] at (8.2,-\r*1.45) {\note};
+    }
+  \end{tikzpicture}
+  \source{\emph{Note.} Diagram by the course team. Target value: 38; shaded cells are the range still searched.}
+\end{frame}
+
+\begin{frame}[fragile]{Each pass of the loop compares the target with the midpoint and keeps only one half}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.68\textwidth}
+\begin{lstlisting}[language=Python]
+def binary_search(items, target):
+    low, high = 0, len(items) - 1
+    while low <= high:
+<@        mid = (low + high) // 2@>
+        if items[mid] == target:
+            return mid
+        if items[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+\end{lstlisting}
+    \column{0.28\textwidth}
+      \vspace{14mm}
+      {\color{ccisOrangeText}\bfseries\small Line 4}\par\vskip1.5mm
+      \small The midpoint splits the remaining range, so each pass discards half of it.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{A sorted array holds 1,024 items. At most how many comparisons does binary search need?}
+  \framesubtitle{\checklabel}
+  \options{10}{11}{512}{1,024}
+  \vfill
+  {\color{ccisMuted}Think alone for 1 minute, then compare with a neighbor.}\par
+  \nextlink{Binary search needs sorted data. What does sorting cost?}
+  \vskip3mm
+\end{frame}
+
+% ================================================================ Part 2
+\partoutcome{Outcome 2}
+\partquestion{Binary search needs sorted data. What does sorting cost?}
+\section{Choosing a search strategy}
+
+\begin{frame}{Binary search is faster than a linear scan, but only once the data is sorted}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.47\textwidth}
+      {\color{ccisOrangeText}\bfseries\large Linear scan}\par\vskip2mm
+      $O(n)$ comparisons\par\vskip1.5mm Works on unsorted data\par\vskip1.5mm No preparation needed
+    \column{0.47\textwidth}
+      {\color{ccisBlue}\bfseries\large Binary search}\par\vskip2mm
+      $O(\log n)$ comparisons\par\vskip1.5mm Needs sorted data\par\vskip1.5mm Sorting first costs $O(n \log n)$
+  \end{columns}
+  \source{\emph{Note.} [Source line for any adapted material.]}
+\end{frame}
+
+\begin{frame}{[Assertion the chart proves, e.g. ``Series A levels off while Series B keeps rising'']}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[ccis axis, width=128mm, height=50mm, xmin=1, xmax=7, xtick={1,...,7}, ymin=0, ymax=100,
+                 xlabel={[x-axis label, unit]}, ylabel={[y-axis label, unit]}, clip=false]
+      \addplot[ccis a] coordinates {(1,20)(2,45)(3,65)(4,77)(5,82)(6,84)(7,85)}
+        node[right,font=\fontsize{7}{8}\selectfont\bfseries,text=ccisBlue,pos=1] {[Series A]};
+      \addplot[ccis b] coordinates {(1,15)(2,24)(3,32)(4,41)(5,49)(6,57)(7,66)}
+        node[right,font=\fontsize{7}{8}\selectfont\bfseries,text=ccisOrangeText,pos=1] {[Series B]};
+    \end{axis}
+  \end{tikzpicture}
+  \source{\emph{Note.} Sample data; replace with your own. Figure adapted from \textcite[p.~121]{manning2008} would be cited like this.}
+\end{frame}
+
+% ================================================================ Close
+\begin{frame}{Two points to carry into the lab}
+  \framesubtitle{Summary}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.6\textwidth}
+      \begin{enumerate}\setlength{\itemsep}{4mm}
+        \item {[Restate the headline assertion from Part 1]}
+        \item {[Restate the headline assertion from Part 2]}
+      \end{enumerate}
+    \column{0.34\textwidth}
+      \begin{nextsteps}\small
+        \nextstep{Lab}{[Lab number and task]}
+        \nextstep{Reading}{[Chapter or pages]}
+        \nextstep{Due}{[Assessment and date]}
+        \nextstep{Next lecture}{[Topic]}
+      \end{nextsteps}
+  \end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Homework}
+	\framesubtitle{\checklabel}
+	Given~\textcite{mitchell1997machine} definition of machine learning, suppose your email client watches which emails you do or do not mark as spam, and based on that learns how to better filter spam. What is the experience $E$ in this setting?
+	\options{Classifying emails as spam or not spam.}{Watching you label as spam or not spam. }{The number (or fraction) of emails correctly classified as spam/not spam.}{None of the above -  this is not a machine learning problem.}
+	\vfill
+	{\color{ccisMuted}Think alone for 1 minute, then compare with a neighbor.}\par
+	\nextlink{Binary search needs sorted data. What does sorting cost?}
+	\vskip3mm
+\end{frame}
+
+
+\begin{frame}{Structured Data}
+	\begin{itemize}
+		\item Data for a machine learning task is often recorded in a \orange{table}.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+  \framesubtitle{References \textperiodcentered\ APA 7}
+  \cornerlogo
+  \fontsize{8}{10.5}\selectfont
+  \nocite{*}
+  \printbibliography[heading=none]
+\end{frame}
+
+
+
+\end{document}

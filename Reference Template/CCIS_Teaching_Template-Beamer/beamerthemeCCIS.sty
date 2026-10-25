@@ -1,0 +1,314 @@
+% beamerthemeCCIS.sty
+% Course slide theme for the College of Computing and Information Sciences (CCIS), UTAS.
+% Implements the CCIS Guideline for Teaching Slide Decks: plain layout, one sans family
+% plus one code font, a small palette taken from the UTAS logo, slim footer, logo top right
+% on the title slide, numbered section dividers.
+% Compile with pdfLaTeX, XeLaTeX or LuaLaTeX. Use \documentclass[aspectratio=169,10pt]{beamer}.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeCCIS}[2026/10/22 v1.0 CCIS teaching theme (UTAS)]
+
+\newif\ifccis@fonts  \ccis@fontstrue
+\newif\ifccis@dividers \ccis@dividerstrue
+\DeclareOptionBeamer{nofonts}{\ccis@fontsfalse}
+\DeclareOptionBeamer{nodividers}{\ccis@dividersfalse}
+\ProcessOptionsBeamer
+
+\RequirePackage{iftex}
+\RequirePackage{etoolbox}
+\RequirePackage{tikz}
+\usetikzlibrary{calc,positioning}
+\RequirePackage{listings}
+\RequirePackage{tcolorbox}
+
+% ---------------------------------------------------------------- fonts (Guideline §3)
+\ifccis@fonts
+  \ifPDFTeX\RequirePackage[T1]{fontenc}\fi
+  \IfFileExists{atkinson.sty}
+    {\RequirePackage[sfdefault]{atkinson}}
+    {\RequirePackage[scaled=0.92]{helvet}}
+  \IfFileExists{sourcecodepro.sty}
+    {\RequirePackage[ttdefault,scale=0.95]{sourcecodepro}}
+    {\IfFileExists{inconsolata.sty}{\RequirePackage[varqu]{inconsolata}}{}}
+\fi
+\usefonttheme{default}
+\linespread{1.1}
+
+% ---------------------------------------------------------------- colors (Guideline §5)
+% Contrast against white: Text 16.1:1, Muted 6.0:1, Blue 6.7:1, Navy 11.0:1, OrangeText 5.8:1.
+% UTAS orange (2.5:1) is for shapes only, never for text.
+\definecolor{ccisText}{HTML}{1B1F3B}
+\definecolor{ccisMuted}{HTML}{5B6472}
+\definecolor{ccisBlue}{HTML}{3958A7}
+\definecolor{ccisNavy}{HTML}{2B318B}
+\definecolor{ccisOrange}{HTML}{F68821}
+\definecolor{ccisOrangeDeep}{HTML}{E36725}
+\definecolor{ccisOrangeText}{HTML}{A84A08}
+\definecolor{ccisSurface}{HTML}{F5F7FB}
+\definecolor{ccisHair}{HTML}{E3E7EF}
+\definecolor{ccisBorder}{HTML}{CDD5E9}
+\definecolor{ccisBadge}{HTML}{E8EDF7}
+\definecolor{ccisOnNavy}{HTML}{CDD5E9}   % 7.5:1 on navy
+\definecolor{ccisPeach}{HTML}{FFC58F}    % 7.1:1 on navy
+\definecolor{ccisNavyRule}{HTML}{4A55A8}
+
+\setbeamercolor{normal text}{fg=ccisText,bg=white}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{structure}{fg=ccisBlue}
+\setbeamercolor{frametitle}{fg=ccisText}
+\setbeamercolor{eyebrow}{fg=ccisBlue}
+\setbeamercolor{alerted text}{fg=ccisOrangeText}
+\setbeamercolor{example text}{fg=ccisBlue}
+\setbeamercolor{footline}{fg=ccisMuted}
+\setbeamercolor{source}{fg=ccisMuted}
+\setbeamercolor{item}{fg=ccisBlue}
+\setbeamercolor{description item}{fg=ccisBlue}
+\setbeamercolor{block title}{fg=ccisNavy,bg=}
+\setbeamercolor{block body}{fg=ccisText,bg=}
+\setbeamercolor{bibliography item}{fg=ccisText}
+\setbeamercolor{bibliography entry author}{fg=ccisText}
+\setbeamercolor{bibliography entry title}{fg=ccisText}
+\setbeamercolor{bibliography entry location}{fg=ccisText}
+\setbeamercolor{bibliography entry note}{fg=ccisText}
+
+% ---------------------------------------------------------------- sizes
+% A 16:9 Beamer frame is 160 mm wide; multiply sizes by about 2.1 for the PowerPoint
+% equivalent on a 13.33 in slide. 16 pt headline = 34 pt, 10 pt body = 21 pt,
+% 6.8 pt source line and footer = 14 pt (the guideline's minimum), 9 pt code = 19 pt.
+\setbeamerfont{frametitle}{size=\fontsize{16}{19}\selectfont,series=\bfseries}
+\setbeamerfont{eyebrow}{size=\fontsize{6.8}{8.2}\selectfont,series=\bfseries}
+\setbeamerfont{footline}{size=\fontsize{6.8}{8.2}\selectfont}
+\setbeamerfont{source}{size=\fontsize{6.8}{8.6}\selectfont}
+\setbeamerfont{caption}{size=\fontsize{7.2}{9}\selectfont}
+\setbeamerfont{description item}{series=\bfseries}
+\setbeamerfont{itemize/enumerate subbody}{size=\normalsize}
+\setbeamerfont{block title}{series=\bfseries,size=\normalsize}
+
+\setbeamersize{text margin left=7mm,text margin right=7mm}
+\beamer@centeredfalse   % top-aligned frames: headlines sit at the same height on every slide
+
+% ---------------------------------------------------------------- plain inner elements
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{itemize item}{\raisebox{0.1ex}{\textbullet}}
+\setbeamertemplate{itemize subitem}{\textendash}
+\setbeamertemplate{enumerate item}{\bfseries\insertenumlabel.}
+\setbeamertemplate{enumerate subitem}{\insertsubenumlabel.}
+\setbeamertemplate{blocks}[default]
+\setbeamertemplate{caption}[default]
+\setbeamertemplate{bibliography item}{}
+\setbeamertemplate{frametitle continuation}{}
+\setlength{\leftmargini}{1.2em}
+
+% ---------------------------------------------------------------- course metadata
+\def\ccis@coursecode{[COURSE CODE]}
+\def\ccis@coursetitle{[Course title]}
+\def\ccis@lecture{[N]}
+\def\ccis@branch{[Branch]}
+\def\ccis@semester{[Semester] [Academic year]}
+\def\ccis@ack{}
+\def\ccis@logo{utas-logo}
+\def\ccis@college{College of Computing and\\Information Sciences}
+\newcommand{\coursecode}[1]{\def\ccis@coursecode{#1}}
+\newcommand{\coursetitle}[1]{\def\ccis@coursetitle{#1}}
+\newcommand{\lecturenumber}[1]{\def\ccis@lecture{#1}}
+\newcommand{\branch}[1]{\def\ccis@branch{#1}}
+\newcommand{\semester}[1]{\def\ccis@semester{#1}}
+\newcommand{\acknowledgment}[1]{\def\ccis@ack{#1}}
+\newcommand{\utaslogo}[1]{\def\ccis@logo{#1}}
+\newcommand{\insertcoursecode}{\ccis@coursecode}
+
+% ---------------------------------------------------------------- frame title: eyebrow + headline
+% The small label above the headline is \framesubtitle{...} if given; otherwise
+% "Part n · <current section>" once the first \section has started.
+\setbeamertemplate{frametitle}{%
+  \vskip5mm%
+  {\usebeamerfont{eyebrow}\usebeamercolor[fg]{eyebrow}%
+   \setbox0\hbox{\insertframesubtitle}%
+   \ifdim\wd0>0pt\insertframesubtitle
+   \else\ifnum\c@section>0 Part~\the\c@section\ \textperiodcentered\ \insertsectionhead\fi\fi
+   \strut\par}%
+  \vskip0.6mm%
+  {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\raggedright\insertframetitle\par}%
+  \vskip3mm}
+
+% ---------------------------------------------------------------- footline (Guideline §4)
+\setbeamertemplate{footline}{%
+  \hbox to\paperwidth{\hskip7mm%
+    \vbox{\hsize=\dimexpr\paperwidth-14mm\relax
+      {\color{ccisHair}\hrule height 0.3pt}\vskip1.6mm
+      \hbox to\hsize{\usebeamerfont{footline}\usebeamercolor[fg]{footline}%
+        \ccis@coursecode\ \textperiodcentered\ Lecture~\ccis@lecture\hfill\insertframenumber}}%
+    \hskip7mm}%
+  \vskip3.2mm}
+
+% ---------------------------------------------------------------- source line (Guideline §9)
+% \source{Note. Adapted from ...} pushes a 14 pt-equivalent line to the bottom of the frame.
+\newcommand{\source}[1]{\par\vfill{\usebeamerfont{source}\usebeamercolor[fg]{source}\raggedright #1\par}\vskip1.5mm}
+
+% ---------------------------------------------------------------- title page (Guideline §4, §7, §8)
+\setbeamertemplate{title page}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north east,inner sep=0] at ($(current page.north east)+(-6.2mm,-6mm)$)
+      {\includegraphics[height=16.5mm]{\ccis@logo}};
+    \node[anchor=north west,inner sep=0,align=left,text=ccisBlue,
+          font=\fontsize{7.2}{9.5}\selectfont\bfseries] at ($(current page.north west)+(9mm,-8.5mm)$)
+      {\ccis@college};
+    \node[anchor=north west,inner sep=0,text width=125mm,text=ccisBlue,
+          font=\fontsize{10}{12.5}\selectfont\bfseries] (ccis@course)
+      at ($(current page.north west)+(9mm,-35mm)$) {\ccis@coursecode\ \textperiodcentered\ \ccis@coursetitle};
+    \fill[ccisOrange,rounded corners=0.35mm] ($(ccis@course.north west)+(0,2.4mm)$) rectangle ++(11mm,0.75mm);
+    \node[anchor=north west,inner sep=0,text width=135mm,text=ccisText,align=left,
+          font=\fontsize{18.5}{21.5}\selectfont\bfseries] (ccis@title)
+      at ($(ccis@course.south west)+(0,-2.6mm)$) {Lecture~\ccis@lecture: \inserttitle};
+    \node[anchor=north west,inner sep=0,text width=125mm,align=left,
+          font=\fontsize{8.5}{11.5}\selectfont] (ccis@details)
+      at ($(ccis@title.south west)+(0,-4mm)$)
+      {\textcolor{ccisText}{\insertauthor\ \textperiodcentered\ UTAS-\ccis@branch}\\
+       \textcolor{ccisMuted}{\ccis@semester}};
+    \ifx\ccis@ack\@empty\else
+      \draw[ccisHair,line width=0.3pt] ($(current page.south west)+(9mm,14.5mm)$) -- ($(current page.south east)+(-9mm,14.5mm)$);
+      \node[anchor=north west,inner sep=0,text width=140mm,align=left,text=ccisMuted,
+            font=\fontsize{6.8}{8.6}\selectfont] at ($(current page.south west)+(9mm,12.8mm)$) {\ccis@ack};
+    \fi
+    \coordinate (ccis@s) at (current page.south west);
+    \fill[ccisBlue]       (ccis@s) rectangle ++($6/14*(\paperwidth,0)+(0,1mm)$);
+    \fill[ccisNavy]       ($(ccis@s)+6/14*(\paperwidth,0)$)  rectangle ++($3/14*(\paperwidth,0)+(0,1mm)$);
+    \fill[ccisOrangeDeep] ($(ccis@s)+9/14*(\paperwidth,0)$)  rectangle ++($2/14*(\paperwidth,0)+(0,1mm)$);
+    \fill[ccisOrange]     ($(ccis@s)+11/14*(\paperwidth,0)$) rectangle ++($3/14*(\paperwidth,0)+(0,1mm)$);
+  \end{tikzpicture}}
+
+% \titleframe : the title slide (plain, no footer)
+\newcommand{\titleframe}{{\setbeamertemplate{footline}{}\begin{frame}[plain]\titlepage\end{frame}}}
+
+% ---------------------------------------------------------------- parts registry (for dividers and agenda)
+\def\ccis@totalparts{0}
+\def\ccis@regpart#1#2#3{\csgdef{ccis@part@#1}{#2}\csgdef{ccis@outcome@#1}{#3}}
+\def\ccis@settotal#1{\gdef\ccis@totalparts{#1}}
+\AtEndDocument{\immediate\write\@auxout{\string\ccis@settotal{\the\c@section}}}
+\def\ccis@nextquestion{}
+\def\ccis@nextoutcome{}
+% \partquestion{...}: bridging question shown on the next section divider (Guideline §10)
+\newcommand{\partquestion}[1]{\gdef\ccis@nextquestion{#1}}
+% \partoutcome{...}: the outcome this part serves, listed on the agenda
+\newcommand{\partoutcome}[1]{\gdef\ccis@nextoutcome{#1}}
+
+\newcommand{\ccis@divider}{%
+  \immediate\write\@auxout{\string\ccis@regpart{\the\c@section}{\expandonce{\insertsectionhead}}{\expandonce{\ccis@nextoutcome}}}%
+  {\setbeamercolor{background canvas}{bg=ccisNavy}%
+   \setbeamertemplate{footline}{}%
+   \begin{frame}[plain]
+   \begin{tikzpicture}[remember picture,overlay]
+     \coordinate (nw) at (current page.north west);
+     \fill[ccisOrange,rounded corners=0.35mm] ($(nw)+(9.4mm,-19.4mm)$) rectangle ++(11mm,0.75mm);
+     \node[anchor=north west,inner sep=0,text=ccisPeach,font=\fontsize{10}{12}\selectfont\bfseries]
+       (p) at ($(nw)+(9.4mm,-22.5mm)$) {Part \the\c@section\ifnum\ccis@totalparts>0\ of \ccis@totalparts\fi};
+     \node[anchor=north west,inner sep=0,text=white,text width=135mm,align=left,
+           font=\fontsize{21}{24}\selectfont\bfseries] (t) at ($(p.south west)+(0,-3.5mm)$) {\insertsectionhead};
+     \ifx\ccis@nextquestion\@empty\else
+       \node[anchor=north west,inner sep=0,text=ccisOnNavy,text width=125mm,align=left,
+             font=\fontsize{9.6}{13}\selectfont] at ($(t.south west)+(0,-5mm)$) {\ccis@nextquestion};
+     \fi
+     \ifnum\ccis@totalparts>0
+       \draw[ccisNavyRule,line width=0.3pt] ($(current page.south west)+(9.4mm,17mm)$) -- ($(current page.south east)+(-9.4mm,17mm)$);
+       \pgfmathsetlengthmacro\ccis@colw{(\paperwidth-18.8mm)/\ccis@totalparts}
+       \foreach \i in {1,...,\ccis@totalparts}{%
+         \ifnum\i=\c@section
+           \fill[ccisOrange] ($(current page.south west)+(9.4mm,17mm)+({(\i-1)*\ccis@colw},0)$) rectangle ++(\ccis@colw-4mm,0.5mm);
+           \node[anchor=north west,inner sep=0,text=white,text width=\ccis@colw-4mm,align=left,font=\fontsize{7.2}{9}\selectfont\bfseries]
+             at ($(current page.south west)+(9.4mm,14mm)+({(\i-1)*\ccis@colw},0)$) {Part \i\ \textperiodcentered\ now\\\csuse{ccis@part@\i}};
+         \else
+           \node[anchor=north west,inner sep=0,text=ccisOnNavy,text width=\ccis@colw-4mm,align=left,font=\fontsize{7.2}{9}\selectfont]
+             at ($(current page.south west)+(9.4mm,14mm)+({(\i-1)*\ccis@colw},0)$) {Part \i\\\csuse{ccis@part@\i}};
+         \fi}
+     \fi
+   \end{tikzpicture}
+   \end{frame}}%
+  \gdef\ccis@nextquestion{}\gdef\ccis@nextoutcome{}}
+\ifccis@dividers\AtBeginSection{\ccis@divider}\fi
+
+% \agendalist : the parts of this lecture, read from the sections (second compile)
+\newcommand{\agendalist}{%
+  \par\vskip1mm
+  \ifnum\ccis@totalparts>0
+    \foreach \i in {1,...,\ccis@totalparts}{%
+      {\color{ccisHair}\hrule height 0.3pt}\vskip2.4mm
+      \hbox to\linewidth{\hbox to 16mm{\textcolor{ccisBlue}{\bfseries\small Part \i}\hfill}%
+        {\fontsize{11}{13}\selectfont\bfseries\csuse{ccis@part@\i}}\hfill
+        \textcolor{ccisMuted}{\small\csuse{ccis@outcome@\i}}}\vskip2.4mm}%
+  \else
+    \textcolor{ccisMuted}{[Compile twice to list the sections]}\par\vskip2mm
+  \fi
+  {\color{ccisHair}\hrule height 0.3pt}\vskip2.4mm
+  \hbox to\linewidth{\hbox to 16mm{\textcolor{ccisMuted}{\bfseries\small Close}\hfill}%
+    \textcolor{ccisMuted}{\fontsize{11}{13}\selectfont Summary, next steps and references}\hfill}\vskip2.4mm
+  {\color{ccisHair}\hrule height 0.3pt}\par}
+
+% ---------------------------------------------------------------- helpers
+\newcommand{\clo}[1]{\hfill\textcolor{ccisBlue}{\small\bfseries CLO~#1}}
+\newcommand{\checklabel}{\textcolor{ccisOrangeText}{Check your understanding \textperiodcentered\ Part~\the\c@section}}
+\newcommand{\lastlecture}[1]{\source{\textcolor{ccisOrangeText}{\bfseries Last lecture:}\ \textcolor{ccisText}{#1}}}
+\newcommand{\nextlink}[1]{\textcolor{ccisBlue}{\bfseries Next:}\ #1}
+
+% Check for understanding: \options{A text}{B text}{C text}{D text}
+\newcommand{\ccis@badge}[1]{\tikz[baseline=(b.base)]\node(b)[fill=ccisBadge,text=ccisNavy,font=\bfseries\small,
+  rounded corners=0.7mm,minimum width=5.6mm,minimum height=5.6mm,inner sep=0]{#1};}
+\newcommand{\ccis@opt}[2]{%
+  \begin{tcolorbox}[colback=white,colframe=ccisBorder,boxrule=0.6pt,arc=1.2mm,
+    left=2.6mm,right=2.6mm,top=0mm,bottom=0mm,height=12.5mm,valign=center,width=\linewidth]
+    \ccis@badge{#1}\hspace{2.6mm}#2\end{tcolorbox}}
+\newcommand{\options}[4]{%
+  \par\vskip1mm
+  \noindent\begin{minipage}[t]{0.488\linewidth}\ccis@opt{A}{#1}\end{minipage}\hfill
+  \begin{minipage}[t]{0.488\linewidth}\ccis@opt{B}{#2}\end{minipage}\par\vskip2.4mm
+  \noindent\begin{minipage}[t]{0.488\linewidth}\ccis@opt{C}{#3}\end{minipage}\hfill
+  \begin{minipage}[t]{0.488\linewidth}\ccis@opt{D}{#4}\end{minipage}\par}
+
+% Next steps panel: \begin{nextsteps} \step{Lab}{...} ... \end{nextsteps}
+\newtcolorbox{nextsteps}{colback=ccisSurface,colframe=ccisSurface,boxrule=0pt,arc=1.2mm,
+  left=3.5mm,right=3.5mm,top=2.5mm,bottom=2.5mm,
+  before upper={\textcolor{ccisOrangeText}{\bfseries Next steps}\par\vskip2mm}}
+\newcommand{\nextstep}[2]{{\textcolor{ccisBlue}{\bfseries\small #1}\par #2\par}\vskip1.4mm}
+
+% Evidence placeholder box (delete once the real figure is in)
+\newcommand{\evidencebox}[1][Visual evidence: diagram, plot, code or worked example]{%
+  \begin{tcolorbox}[colback=ccisSurface,colframe=ccisBorder,boxrule=0.6pt,arc=1mm,
+    height=38mm,valign=center,halign=center,borderline={0.6pt}{0pt}{ccisBorder,dashed},frame hidden]
+    \textcolor{ccisMuted}{#1}\end{tcolorbox}}
+
+% Small decorative logo, top right (closing frames)
+\newcommand{\cornerlogo}{\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north east,inner sep=0] at ($(current page.north east)+(-6.5mm,-4.5mm)$)
+    {\includegraphics[height=8.5mm]{\ccis@logo}};\end{tikzpicture}}
+
+% ---------------------------------------------------------------- code (Guideline §2, §3)
+% Wrap the key line in <@ ... @> to highlight it (bold, dark orange).
+\newcommand{\ccis@hl}{\bfseries\color{ccisOrangeText}}
+\lstdefinestyle{ccis}{
+  basicstyle=\ttfamily\fontsize{9}{10.2}\selectfont\color{ccisText},
+  keywordstyle=\color{ccisNavy}\bfseries,
+  commentstyle=\color{ccisMuted}\itshape,
+  stringstyle=\color{ccisOrangeText},
+  numbers=left, numberstyle=\ttfamily\fontsize{6.8}{10.2}\selectfont\color{ccisMuted}, numbersep=3mm,
+  backgroundcolor=\color{ccisSurface}, frame=single, framerule=0pt, rulecolor=\color{ccisSurface},
+  framesep=2mm, xleftmargin=6.5mm, xrightmargin=2.5mm, aboveskip=1mm, belowskip=1mm,
+  columns=fullflexible, keepspaces=true, upquote=true, showstringspaces=false, tabsize=4,
+  moredelim=**[is][\ccis@hl]{<@}{@>}}
+\lstset{style=ccis}
+% a language= option resets delimiters, so re-add the highlight after every language change
+\lst@AddToHook{SetLanguage}{\lstset{moredelim=**[is][\ccis@hl]{<@}{@>}}}
+
+% ---------------------------------------------------------------- charts (Guideline §5)
+% If pgfplots is loaded: axis style "ccis axis", series styles "ccis a", "ccis b", "ccis c".
+% Series differ by line style and marker shape, never by color alone.
+\AtBeginDocument{\@ifpackageloaded{pgfplots}{%
+  \pgfplotsset{
+    ccis axis/.style={axis lines=left, axis line style={ccisMuted}, tick style={ccisMuted},
+      ymajorgrids, grid style={ccisHair,line width=0.3pt},
+      tick label style={font=\fontsize{6.8}{8}\selectfont,text=ccisText},
+      label style={font=\fontsize{6.8}{8}\selectfont,text=ccisText}, legend style={draw=none}},
+    ccis a/.style={color=ccisBlue,solid,line width=1.1pt,mark=*,mark size=1.5pt},
+    ccis b/.style={color=ccisOrangeDeep,dashed,line width=1.1pt,mark=triangle*,mark size=2.1pt,mark options={solid}},
+    ccis c/.style={color=ccisNavy,dotted,line width=1.1pt,mark=square*,mark size=1.4pt,mark options={solid}},
+  }}{}}
+
+\mode<all>
